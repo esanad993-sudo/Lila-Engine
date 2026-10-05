@@ -1,0 +1,17 @@
+[package]
+name = "lilac"
+version = "0.1.0"
+edition = "2021"
+description = "LILA compiler: #Atom resource symbols, Q24.8 fixed-point, Huffman-compacted .libyte bytecode"
+
+[[bin]]
+name = "lilac"
+path = "src/main.rs"
+
+[dependencies]
+# v8 OPTIMIZER subsystem 2: build-time WGSL validation for the synthesized
+# shaders (`lilac shader`). Dev-time only — the player never runs this.
+naga = { version = "0.14", default-features = false, features = ["wgsl-in"] }
+
+[profile.release]
+opt-level = 3
