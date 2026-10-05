@@ -1,0 +1,11 @@
+# Rust build output
+target/
+
+# Zig build output
+zig-out/
+zig-cache/
+.zig-cache/
+
+# Editor / OS noise
+.DS_Store
+*.swp

@@ -1,0 +1,84 @@
+game { title: "LILA DEMO"  width: 256  height: 256  wrap: true
+       capacity { entities: 512 } }
+
+key     { #left, #right, #fire }
+sound   { #shoot, #boom }
+text    { #score_label: "SCORE", #over: "GAME OVER" }
+scene   { #play: start_play }
+
+sprite  #ship (12) { poly [ 0,-12, 8,10, 0,5, -8,10 ] fill: 0x66CCFF grad: 0x3366AA }
+sprite  #rock (10) { poly [ -10,-6, 4,-10, 10,2, 0,10, -8,4 ] fill: 0x99AA77 }
+sprite  #shot (3)  { poly [ 0,-3, 2,3, 0,1, -2,3 ] fill: 0xFFDD55 add: true }
+
+music   #track { bpm: 150
+                 square: [ C4 . E4 . G4 . E4 . ]
+                 tri:    [ C2 . . . G1 . . . ]
+                 noise:  [ . . x . . . x . ] }
+
+sfx     #shoot { wave: square  freq: 880  sweep: -1200  decay: 10  vol: 10 }
+sfx     #boom  { wave: noise   freq: 220  sweep: -100   decay: 24  vol: 12 }
+
+anim    #bob   { keys: [ (0,0), (32,80), (64,0) ] }
+
+global  { score: u16 = 0  lives: u = 3  px: fixed = 256  tick: u16 = 0 }
+
+entity  Ship   { x: fixed  y: fixed  vx: fixed  vy: fixed  rot: ang = 0  cool: u8 = 0 }
+entity  Bullet { x: fixed  y: fixed  vx: fixed  vy: fixed  ttl: u8 = 60 }
+entity  Rock   { x: fixed  y: fixed  vx: fixed  vy: fixed  spin: ang = 0  hp: u = 3 }
+
+fn start_play() {
+    score = 0;
+    lives = 3;
+    spawn Ship { x: 128.0, y: 200.0 };
+}
+
+fn fire(sx: fixed, sy: fixed) {
+    spawn Bullet { x: sx, y: sy, vx: 0.0, vy: -6.0, ttl: 60 };
+    sfx(#shoot);
+}
+
+fn init() {
+    music(#track);
+    goto(#play);
+}
+
+fn update(e: Ship) {
+    if (key(#left))  { e.rot -= 100; }
+    if (key(#right)) { e.rot += 100; }
+    if (key(#fire)) {
+        if (e.cool == 0) {
+            call fire(e.x, e.y);
+            e.cool = 6;
+        }
+    }
+    if (e.cool > 0) { e.cool -= 1; }
+}
+
+fn update(e: Bullet) {
+    if (e.ttl > 0) { e.ttl -= 1; } else { kill e; }
+}
+
+fn update(e: Rock) {
+    e.spin += 8;
+}
+
+fn update() {
+    tick += 1;
+}
+
+fn draw(e: Ship) {
+    draw(#ship, e.x, e.y, e.rot, 1.0, 0xFFFFFFFF);
+}
+
+fn draw(e: Bullet) {
+    draw(#shot, e.x, e.y, 0, 1.0, 0xFFFFFFFF);
+}
+
+fn draw(e: Rock) {
+    draw(#rock, e.x, e.y, e.spin, 1.0, 0xFFFFFFFF);
+}
+
+fn draw() {
+    draw_text(#score_label, 8, 8, 0x88CCFFFF);
+    draw_num(score, 64, 8, 0xFFFFFFFF);
+}
